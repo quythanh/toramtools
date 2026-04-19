@@ -12,12 +12,14 @@ export default function Loading({
 }: LoadingProps) {
   return (
     <div
-      className={`flex justify-center items-center p-8 bg-black/10 dark:bg-black/20 backdrop-blur-xl rounded-2xl border border-border/40 ${className}`}
+      className={`flex flex-col justify-center items-center p-8 bg-card/60 backdrop-blur-xl rounded-2xl border border-primary/10 shadow-xl shadow-primary/5 ${className}`}
       {...props}
     >
-      <Spinner className="text-foreground/60" />
+      <Spinner className="text-primary w-8 h-8" />
       {text && (
-        <span className="ml-3 text-foreground/60 font-medium">{text}</span>
+        <span className="mt-4 text-primary/80 font-medium tracking-wide animate-pulse">
+          {text}
+        </span>
       )}
     </div>
   );
