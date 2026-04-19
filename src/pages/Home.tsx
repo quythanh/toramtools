@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { NavLink } from 'react-router';
+import { Link, NavLink } from 'react-router';
 
 type ToolKey = 'xp' | 'sp' | 'bs' | 'cc' | 'ns' | 'tc';
 
@@ -120,12 +120,21 @@ export default function Home() {
               className="group rounded-2xl border border-border/50 bg-linear-to-br from-card/80 to-card/30 text-card-foreground p-5 shadow-sm backdrop-blur-md hover:shadow-md hover:border-primary/30 hover:from-card hover:to-primary/5 transition-all duration-300"
             >
               <div className="flex items-start justify-between gap-4">
-                <a
-                  href={card.href}
-                  className="text-base font-bold text-card-foreground no-underline group-hover:text-primary transition-colors"
-                >
-                  {card.title}
-                </a>
+                {card.href.endsWith('.html') ? (
+                  <a
+                    href={card.href}
+                    className="text-base font-bold text-card-foreground no-underline group-hover:text-primary transition-colors"
+                  >
+                    {card.title}
+                  </a>
+                ) : (
+                  <Link
+                    to={card.href}
+                    className="text-base font-bold text-card-foreground no-underline group-hover:text-primary transition-colors"
+                  >
+                    {card.title}
+                  </Link>
+                )}
 
                 <button
                   type="button"
