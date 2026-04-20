@@ -1,0 +1,1 @@
+var e=e=>e?new Intl.NumberFormat().format(e):`NaN`;export{e as t};

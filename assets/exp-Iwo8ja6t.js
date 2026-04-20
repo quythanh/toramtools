@@ -1,0 +1,1 @@
+var e=e=>Math.floor(.025*e**4+2*e),t=(t=1e4)=>{let n=t+1,r=Array.from({length:n},()=>Array(n).fill(0));for(let t=2;t<n;t++)r[1][t]=e(t-1);for(let e=2;e<n;e++)for(let t=e+1;t<n;t++)r[e][t]=r[e][t-1]+r[1][t];return r},n=125e5,r=t();export{r as n,e as r,n as t};
