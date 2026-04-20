@@ -52,8 +52,8 @@ export const addXP = (
   return [lv, lvPercentage];
 };
 
-export const generateQuestName = (quest: MainQuest) =>
-  `CH${quest.chapter} - ${quest.name}`;
+export const generateQuestName = (quest?: MainQuest) =>
+  `CH${quest?.chapter} - ${quest?.name}`;
 
 export const isHasVenena = (mqBegin: number, mqEnd: number) =>
   mqBegin <= VENENA_ID && mqEnd >= VENENA_ID;

@@ -2,7 +2,7 @@ import { lazy } from 'react';
 import { createBrowserRouter } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 
-import MainLayout from '@/layouts/MainLayout';
+const MainLayout = lazy(() => import('@/layouts/MainLayout'));
 
 const router = createBrowserRouter([
   {
@@ -17,6 +17,11 @@ const router = createBrowserRouter([
         path: 'exp-calculator',
         Component: lazy(() => import('@/pages/Exp')),
         handle: { title: 'Experience Calculator' },
+      },
+      {
+        path: 'advanced-search',
+        Component: lazy(() => import('@/pages/AdvancedSearch')),
+        handle: { title: 'Simplified Advanced Search' },
       },
       {
         path: 'credits',

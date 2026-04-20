@@ -6,7 +6,7 @@ const navItems: Array<{ href: string; label: string; navLink: boolean }> = [
   { href: '/exp-calculator', label: 'Exp', navLink: true },
   { href: '/sp.html', label: 'Stat/SP', navLink: false },
   { href: '/blacksmith.html', label: 'BS Calc', navLink: false },
-  { href: '/corynclub.html', label: 'Advance Search', navLink: false },
+  { href: '/advanced-search', label: 'Advance Search', navLink: true },
   { href: '/scroll.html', label: 'Ninja Scrolls', navLink: false },
   { href: '/credits', label: 'Credits', navLink: true },
 ];

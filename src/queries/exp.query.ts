@@ -1,9 +1,9 @@
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import type { Level, MainQuest } from '@/types/exp.type';
 import { Request } from '@/utils/request';
 
 export const useGetLevelData = () =>
-  useSuspenseQuery<Level>({
+  useQuery<Level>({
     queryKey: ['level'],
     queryFn: () => {
       const params = new URLSearchParams({

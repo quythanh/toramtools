@@ -1,4 +1,11 @@
-import { type ComponentProps, lazy, Suspense, useMemo, useState } from 'react';
+import {
+  type ComponentProps,
+  lazy,
+  Suspense,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import Loading from '@/components/Loading';
 import { useGetLevelData } from '@/queries/exp.query';
 import type { PlayerStat } from '@/types/exp.type';
@@ -18,12 +25,12 @@ const UIMode = {
 type UIModeType = (typeof UIMode)[keyof typeof UIMode];
 
 export default function Xp() {
-  const { data: levelData } = useGetLevelData();
+  const { data: levelData, isPending: isFetchingLevel } = useGetLevelData();
   const [mode, setMode] = useState<UIModeType>(UIMode.MAIN_QUEST);
   const [playerStat, setPlayerStat] = useState<PlayerStat>({
     level: 1,
     percent: 0,
-    target: levelData.level,
+    target: 1,
   });
 
   const xpRequired = useMemo(
@@ -31,59 +38,69 @@ export default function Xp() {
     [playerStat],
   );
 
+  useEffect(() => {
+    if (!levelData) return;
+    setPlayerStat((prev) => ({ ...prev, target: levelData.level }));
+  }, [levelData]);
+
   return (
     <div className="mx-auto max-w-3xl px-4">
       <Hero />
 
       <div className="space-y-6">
-        <Suspense fallback={<Loading />}>
-          <Section title="Level">
-            <div className="grid grid-cols-3 py-2 gap-1 w-fit mx-auto">
-              <Input
-                id="level"
-                title="Lv"
-                min={1}
-                value={playerStat.level}
-                onChange={(e) =>
-                  setPlayerStat((prev) => ({
-                    ...prev,
-                    level: Number(e.target.value),
-                  }))
-                }
-              />
-              <Input
-                id="level-percentage"
-                title="%"
-                min={0}
-                max={99}
-                value={playerStat.percent}
-                onChange={(e) =>
-                  setPlayerStat((prev) => ({
-                    ...prev,
-                    percent: Number(e.target.value),
-                  }))
-                }
-              />
-              <Input
-                id="target-level"
-                title="TargetLv"
-                min={1}
-                max={10_000}
-                value={playerStat.target}
-                onChange={(e) =>
-                  setPlayerStat((prev) => ({
-                    ...prev,
-                    target: Number(e.target.value),
-                  }))
-                }
-              />
-            </div>
+        {isFetchingLevel ? (
+          <Loading />
+        ) : (
+          <Suspense fallback={<Loading />}>
+            <Section title="Level">
+              <div className="grid grid-cols-3 py-2 gap-1 w-fit mx-auto">
+                <Input
+                  id="level"
+                  title="Lv"
+                  min={1}
+                  value={playerStat.level}
+                  onChange={(e) =>
+                    setPlayerStat((prev) => ({
+                      ...prev,
+                      level: Number(e.target.value),
+                    }))
+                  }
+                />
+                <Input
+                  id="level-percentage"
+                  title="%"
+                  min={0}
+                  max={99}
+                  value={playerStat.percent}
+                  onChange={(e) =>
+                    setPlayerStat((prev) => ({
+                      ...prev,
+                      percent: Number(e.target.value),
+                    }))
+                  }
+                />
+                <Input
+                  id="target-level"
+                  title="TargetLv"
+                  min={1}
+                  max={10_000}
+                  value={playerStat.target}
+                  onChange={(e) =>
+                    setPlayerStat((prev) => ({
+                      ...prev,
+                      target: Number(e.target.value),
+                    }))
+                  }
+                />
+              </div>
 
-            <div className="text-center">
-              <b>Total XP required</b>: <span>{formatNumber(xpRequired)}</span>
-            </div>
-          </Section>
-        </Suspense>
+              <div className="text-center">
+                <b>Total XP required</b>:{' '}
+                <span>{formatNumber(xpRequired)}</span>
+              </div>
+            </Section>
+          </Suspense>
+        )}
 
         {/* Mode switch */}
         <div className="flex gap-2">
