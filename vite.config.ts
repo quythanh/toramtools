@@ -1,4 +1,4 @@
-import path from 'node:path';
+import { resolve } from 'node:path';
 import babel from '@rolldown/plugin-babel';
 import tailwindcss from '@tailwindcss/vite';
 import react, { reactCompilerPreset } from '@vitejs/plugin-react';
@@ -11,9 +11,22 @@ export default defineConfig({
     tailwindcss(),
     babel({ presets: [reactCompilerPreset()] }),
   ],
+  build: {
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        404: resolve(__dirname, '404.html'),
+        toramcafe: resolve(__dirname, 'toramcafe.html'),
+        scroll: resolve(__dirname, 'scroll.html'),
+        sp: resolve(__dirname, 'sp.html'),
+        blacksmith: resolve(__dirname, 'blacksmith.html'),
+        statting: resolve(__dirname, 'statting.html'),
+      },
+    },
+  },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      '@': resolve(__dirname, './src'),
     },
   },
 });
