@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router';
 
 const navItems: Array<{ href: string; label: string; navLink: boolean }> = [
-  { href: '/xp.html', label: 'Exp', navLink: false },
+  { href: '/exp-calculator', label: 'Exp', navLink: true },
   { href: '/sp.html', label: 'Stat/SP', navLink: false },
   { href: '/blacksmith.html', label: 'BS Calc', navLink: false },
   { href: '/corynclub.html', label: 'Advance Search', navLink: false },

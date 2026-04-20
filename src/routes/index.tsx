@@ -14,6 +14,11 @@ const router = createBrowserRouter([
         Component: lazy(() => import('@/pages/Home')),
       },
       {
+        path: 'exp-calculator',
+        Component: lazy(() => import('@/pages/Exp')),
+        handle: { title: 'Experience Calculator' },
+      },
+      {
         path: 'credits',
         Component: lazy(() => import('@/pages/Credits')),
         handle: { title: 'Credits' },

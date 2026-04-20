@@ -12,7 +12,7 @@ const toolCards: Array<{
 }> = [
   {
     key: 'xp',
-    href: '/xp.html',
+    href: '/exp-calculator',
     title: 'Experience Calculator',
     description:
       "Find how many times takes to reach certain level through either main quest or side quests or how many levels you'll get by doing these quests a certain number of times.",
