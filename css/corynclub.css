@@ -1,0 +1,94 @@
+.weapon-crysta {
+    color: var(--weapon-crysta);
+}
+
+.normal-crysta {
+    color: var(--normal-crysta);
+}
+
+.additional-crysta {
+    color: var(--additional-crysta);
+}
+
+.special-crysta {
+    color: var(--special-crysta);
+}
+
+.armor-crysta {
+    color: var(--armor-crysta);
+}
+
+*[class*="enhancer-crysta-"] {
+    color: var(--enhancer-crysta);
+}
+
+.enhancer-crysta-blue > span {
+    text-shadow: 0 0 0.25em var(--normal-crysta);
+}
+
+.enhancer-crysta-green > span {
+    text-shadow: 0 0 0.25em var(--armor-crysta);
+}
+
+.enhancer-crysta-red > span {
+    text-shadow: 0 0 0.25em var(--weapon-crysta);
+}
+
+.enhancer-crysta-yellow > span {
+    text-shadow: 0 0 0.25em var(--additional-crysta);
+}
+
+.enhancer-crysta-purple > span {
+    text-shadow: 0 0 0.25em var(--special-crysta);
+}
+
+/*  Lixeiras edits starts from here */
+.footer{
+    background-color: var(--primary-color);
+    border: none;
+    border-top: 1px solid var(--shadow-color);
+}
+
+.main a{
+    text-decoration: none;
+    color: var(--text-color);
+}
+
+li::marker{
+    list-style: none;
+}
+
+legend{
+    background-color: var(--secondary-color);
+    padding: 0.25rem 0.8rem;
+    border-radius: 2em;
+    font-weight: 500;
+}
+.section {
+    background-color: var(--primary-color);
+    box-shadow: 0px 1px 4px 1px var(--shadow-color);
+    border: none;
+}
+
+select, input, .small-input, .chrome-select{
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    padding: 0.2rem;
+    border: 1px solid var(--shadow-color);
+    border-radius: 0.5rem;
+}
+
+input:focus, select:focus{
+    outline: 1px solid rgb(128, 168, 255);
+    box-shadow: 0px 1px 4px 2px var(--shadow-color);
+}
+
+.chrome-button{
+    padding: 0.6em 1em 0.6em 1em;
+    border-radius: 2em;
+    border: 0;
+    border-style: solid;
+    cursor: pointer;
+    background-color: var(--accent-color);
+
+}
