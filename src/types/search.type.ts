@@ -8,25 +8,37 @@ export type SearchStatPayload = [
 export interface SearchPayload {
   types: number[];
   stats: SearchStatPayload[];
+  page?: number;
+  pageSize?: number;
 }
 
 export interface ItemEffect {
-  item_id: number;
-  effect_id: number;
-  effect_label: string;
+  id: number;
+  label: string;
   amount: number;
   applies_to: number;
+}
+
+export interface MapEntity {
+  id: number;
+  name: string;
+}
+
+export interface Monster {
+  id: number;
+  name: string;
+  level: number;
+  map: MapEntity;
 }
 
 export interface Item {
   id: number;
   name: string;
-  type_id: number;
   type_label: string;
   sell: number;
   process: number;
   process_amount: number;
-  badge: string;
-  note: string;
-  effects: ItemEffect[];
+  badge?: string | null;
+  effects?: ItemEffect[];
+  monsters?: Monster[];
 }

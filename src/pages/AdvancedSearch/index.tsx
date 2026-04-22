@@ -5,6 +5,7 @@ import {
   useGetItemTypesData,
   useSearchItems,
 } from '@/queries/search.query';
+import type { Page } from '@/types';
 import type { Item, Operator, SearchStatPayload } from '@/types/search.type';
 
 const CardItem = lazy(() => import('./CardItem'));
@@ -23,6 +24,7 @@ const SPECIAL_CRYSTA_LINKS: Record<number, number> = {
   22: 220,
   20: 200,
 };
+const DEFAULT_PAGE_SIZE = 10;
 
 function prettyJoin(items: string[]) {
   if (items.length <= 1) return items[0] ?? '';
@@ -35,7 +37,7 @@ export default function CorynClub() {
     useGetItemTypesData();
   const { mutateAsync: search, isPending: isSearching } = useSearchItems();
 
-  const [searchResults, setSearchResults] = useState<Item[]>([]);
+  const [searchResults, setSearchResults] = useState<Page<Item> | null>(null);
 
   const itemTypesList = useMemo(
     () => Object.entries(itemTypesData ?? {}),
@@ -102,7 +104,7 @@ export default function CorynClub() {
     statChoices.find((k) => k.toLowerCase() === value.trim().toLowerCase());
 
   // Build payload used for internal search
-  const buildPayload = () => {
+  const buildPayload = (page = 1, limit = DEFAULT_PAGE_SIZE) => {
     const types = selectedTypes.length === 0 ? [-1] : selectedTypes;
     return {
       types,
@@ -114,12 +116,17 @@ export default function CorynClub() {
             line.value,
           ] as SearchStatPayload,
       ),
+      page,
+      pageSize: limit,
     };
   };
 
   // Internal search (calls API via mutateAsync)
-  const handleInternalSearch = async () => {
-    const payload = buildPayload();
+  const handleInternalSearch = async (page = 1) => {
+    const payload = buildPayload(
+      page,
+      searchResults?.pagination.pageSize ?? DEFAULT_PAGE_SIZE,
+    );
     const results = await search(payload);
     setSearchResults(results);
   };
@@ -294,7 +301,7 @@ export default function CorynClub() {
             <button
               type="button"
               className="h-10 rounded-md bg-primary text-primary-foreground font-medium hover:opacity-90"
-              onClick={handleInternalSearch}
+              onClick={() => handleInternalSearch(1)}
             >
               Search (new)
             </button>
@@ -306,8 +313,47 @@ export default function CorynClub() {
         <Loading />
       ) : (
         <Suspense fallback={<Loading />}>
+          {searchResults ? (
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <div className="text-sm text-muted-foreground">
+                Page {searchResults.pagination.currentPage}/
+                {searchResults.pagination.totalPages} - Showing{' '}
+                {searchResults.data.length} of{' '}
+                {searchResults.pagination.totalItems} item(s)
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  className="h-8 rounded-md border border-border/50 bg-background px-3 text-sm disabled:opacity-50"
+                  disabled={
+                    isSearching || searchResults.pagination.currentPage <= 1
+                  }
+                  onClick={() =>
+                    handleInternalSearch(searchResults.pagination.currentPage - 1)
+                  }
+                >
+                  Prev
+                </button>
+                <button
+                  type="button"
+                  className="h-8 rounded-md border border-border/50 bg-background px-3 text-sm disabled:opacity-50"
+                  disabled={
+                    isSearching ||
+                    searchResults.pagination.currentPage >=
+                      searchResults.pagination.totalPages
+                  }
+                  onClick={() =>
+                    handleInternalSearch(searchResults.pagination.currentPage + 1)
+                  }
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          ) : null}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-2">
-            {searchResults.map((item) => (
+            {searchResults?.data.map((item) => (
               <CardItem key={item.id} item={item} />
             ))}
           </div>
