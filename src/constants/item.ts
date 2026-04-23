@@ -21,3 +21,12 @@ export const ApplyMap = [
   'Arrow',
   'Ninjutsu Scroll',
 ];
+
+export const ProcessType = [
+  'Beast',
+  'Wood',
+  'Metal',
+  'Cloth',
+  'Medicine',
+  'Mana',
+];

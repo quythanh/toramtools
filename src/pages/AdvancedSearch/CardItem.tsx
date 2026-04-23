@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
-import { ApplyMap } from '@/constants/item';
+import { ApplyMap, ProcessType } from '@/constants/item';
 import type { Item } from '@/types/search.type';
+import { isValidProcessType } from '@/utils/item';
 import Collapse from './Collapse';
 
 function formatProcessAmount(amount: number) {
@@ -45,13 +46,16 @@ export default function CardItem({ item }: { item: Item }) {
           <div>
             Sell:{' '}
             <span className="text-foreground font-medium">
-              {formatProcessAmount(item.sell)}
+              {formatProcessAmount(item.sell)} {item.sell > 0 ? 'Spina' : null}
             </span>
           </div>
           <div>
             Proc:{' '}
             <span className="text-foreground font-medium">
-              {formatProcessAmount(item.process_amount)}
+              {formatProcessAmount(item.process_amount)}{' '}
+              {isValidProcessType(item.process)
+                ? ProcessType[item.process - 1]
+                : null}
             </span>
           </div>
         </div>
