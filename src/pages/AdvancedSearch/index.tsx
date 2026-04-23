@@ -1,3 +1,13 @@
+import {
+  ChevronLeft,
+  ChevronRight,
+  ExternalLink,
+  Filter,
+  PackageSearch,
+  Plus,
+  Search,
+  Trash2,
+} from 'lucide-react';
 import { lazy, type MouseEvent, Suspense, useMemo, useState } from 'react';
 import Loading from '@/components/Loading';
 import {
@@ -27,14 +37,15 @@ const SPECIAL_CRYSTA_LINKS: Record<number, number> = {
   22: 220,
   20: 200,
 };
-const DEFAULT_PAGE_SIZE = 10;
+const DEFAULT_PAGE_SIZE = 12;
 
 function prettyJoin(items: string[]) {
-  if (items.length <= 1) return items[0] ?? '';
+  if (items.length === 0) return 'None';
+  if (items.length === 1) return items[0];
   return `${items.slice(0, -1).join(', ')} and ${items.at(-1)}`;
 }
 
-export default function CorynClub() {
+export default function AdvancedSearch() {
   const { data: effectData, isPending: isFetchingEffect } = useGetEffectData();
   const { data: itemTypesData, isPending: isFetchingItemTypes } =
     useGetItemTypesData();
@@ -61,7 +72,9 @@ export default function CorynClub() {
 
   const reverseItemTypes = useMemo(
     () =>
-      Object.fromEntries(itemTypesList.map(([name, value]) => [value, name])),
+      Object.fromEntries(
+        itemTypesList.map(([keyName, value]) => [value, keyName]),
+      ),
     [itemTypesList],
   );
 
@@ -110,7 +123,6 @@ export default function CorynClub() {
   const normalizeStatName = (value: string) =>
     statChoices.find((k) => k.toLowerCase() === value.trim().toLowerCase());
 
-  // Build payload used for internal search
   const buildPayload = (page = 1, limit = DEFAULT_PAGE_SIZE) => {
     const types = selectedTypes.length === 0 ? [-1] : selectedTypes;
     const stats = statLines.map(
@@ -124,7 +136,6 @@ export default function CorynClub() {
       pageSize: limit,
     };
 
-    // include name only when present (keeps payload minimal)
     return name ? { ...base, name } : base;
   };
 
@@ -136,12 +147,10 @@ export default function CorynClub() {
     setSearchPayload(payload);
   };
 
-  // Before native submit to Coryn: ensure the form contains itype[] = -1 if user selected none.
   const handleCorynClick = (e: MouseEvent<HTMLButtonElement>) => {
     const form = e.currentTarget.form as HTMLFormElement | null;
     if (!form) return;
 
-    // If nothing selected, add a temporary hidden itype[] = -1 so Coryn receives it.
     if (selectedTypes.length === 0) {
       const hidden = document.createElement('input');
       hidden.type = 'hidden';
@@ -149,233 +158,400 @@ export default function CorynClub() {
       hidden.value = '-1';
       hidden.dataset._temp = '1';
       form.appendChild(hidden);
-      // cleanup after a short while (submit will already be triggered)
       setTimeout(() => hidden.remove(), 2000);
     }
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-4">
-      <form
-        className="mx-auto mt-6 mb-8 max-w-5xl rounded-2xl border border-border/50 bg-card/40 p-4 sm:p-6 shadow-sm"
-        method="POST"
-        action="https://coryn.club/itemsearch_handler.php"
-        target="_blank"
-        rel="noopener"
-      >
-        <input type="hidden" name="iprocess" value="-1" />
-        <fieldset className="space-y-5">
-          <legend className="px-1 text-base sm:text-lg font-semibold text-foreground">
-            Advanced Search
-          </legend>
+    <div className="mx-auto max-w-7xl px-4 py-8">
+      {/* Search Form Card */}
+      <div className="mx-auto mb-10 overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm transition-all">
+        <div className="border-b border-border/50 bg-muted/20 px-6 py-4 flex items-center gap-2">
+          <Filter className="size-5 text-primary" />
+          <h2 className="text-lg font-bold text-foreground">Advanced Search</h2>
+        </div>
 
-          {isFetchingItemTypes ? (
-            <Loading />
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-2">
-              {itemTypesList.map(([name, value]) => (
+        <form
+          className="p-6"
+          method="POST"
+          action="https://coryn.club/itemsearch_handler.php"
+          target="_blank"
+          rel="noopener"
+        >
+          <input type="hidden" name="iprocess" value="-1" />
+          <div className="space-y-8">
+            {/* Item Types Section */}
+            <section className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-foreground">
+                  Item Types
+                </h3>
+                <span className="text-xs text-muted-foreground font-medium bg-muted px-2 py-1 rounded-md">
+                  {selectedTypes.length} selected
+                </span>
+              </div>
+
+              {isFetchingItemTypes ? (
+                <div className="py-4">
+                  <Loading />
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5">
+                  {itemTypesList.map(([typeName, value]) => {
+                    const isSelected = selectedTypes.includes(value);
+                    return (
+                      <label
+                        key={value}
+                        className={`
+                          cursor-pointer select-none relative flex items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all duration-200
+                          hover:shadow-sm focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-1
+                          ${
+                            isSelected
+                              ? 'border-primary bg-primary/10 text-primary shadow-sm'
+                              : 'border-border/60 bg-background hover:border-border hover:bg-accent/30 text-foreground'
+                          }
+                        `}
+                      >
+                        <input
+                          type="checkbox"
+                          name="itype[]"
+                          value={value}
+                          checked={isSelected}
+                          onChange={(e) =>
+                            toggleItemType(value, e.target.checked)
+                          }
+                          className="sr-only"
+                        />
+                        <span className="truncate">{typeName}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              )}
+            </section>
+
+            {/* General Filters Section */}
+            <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
                 <label
-                  key={value}
-                  className="inline-flex items-center gap-2 rounded-md border border-border/50 bg-background/60 px-3 py-2 text-sm"
+                  htmlFor="iname"
+                  className="block text-sm font-semibold text-foreground"
                 >
-                  <input
-                    type="checkbox"
-                    name="itype[]"
-                    value={value}
-                    checked={selectedTypes.includes(value)}
-                    onChange={(e) => toggleItemType(value, e.target.checked)}
-                    className="accent-primary"
-                  />
-                  <span>{name}</span>
+                  Item Name
                 </label>
-              ))}
-            </div>
-          )}
-
-          <div className="space-y-1">
-            <div className="text-sm text-muted-foreground">
-              <span className="font-medium text-foreground">
-                Selected type(s):{' '}
-              </span>
-              {selectedTypeText || 'None'}
-            </div>
-
-            <label className="block">
-              <span className="text-sm font-medium text-foreground">Name</span>
-              <input
-                type="text"
-                name="iname"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Item name"
-                className="mt-1 h-10 w-full rounded-md border border-border/50 bg-background px-3 text-sm"
-              />
-            </label>
-          </div>
-
-          <datalist id="stat-choices">
-            {statChoices.map((choice) => (
-              <option key={choice} value={choice} />
-            ))}
-          </datalist>
-
-          <input type="hidden" name="op[]" value=">=" />
-
-          <div className="space-y-2">
-            {statLines.map((line) => {
-              const validStatName = normalizeStatName(line.statName);
-              const inputStyle = !line.statName
-                ? 'border-border/50'
-                : validStatName
-                  ? 'border-emerald-500/60 bg-emerald-500/10'
-                  : 'border-red-500/60 bg-red-500/10';
-
-              return (
-                <div
-                  key={line.id}
-                  className="flex flex-wrap items-center gap-2"
-                >
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Search className="size-4 text-muted-foreground" />
+                  </div>
                   <input
+                    id="iname"
                     type="text"
-                    list="stat-choices"
-                    value={line.statName}
-                    onChange={(e) =>
-                      updateStatLine(line.id, { statName: e.target.value })
-                    }
-                    className={`h-10 min-w-55 flex-1 rounded-md border px-3 text-sm ${inputStyle}`}
-                    placeholder="Input stat name"
+                    name="iname"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Search by name..."
+                    className="h-10 w-full rounded-lg border border-border/60 bg-background pl-10 pr-4 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   />
+                </div>
+              </div>
 
-                  <select
-                    value={line.op}
-                    onChange={(e) =>
-                      updateStatLine(line.id, {
-                        op: e.target.value as Operator,
-                      })
-                    }
-                    className="h-10 rounded-md border border-border/50 bg-background px-2"
-                    name={
-                      validStatName ? `op[${effectData?.[validStatName]}]` : ''
-                    }
-                  >
-                    <option value=">=">≥</option>
-                    <option value=">">&gt;</option>
-                    <option value="=">=</option>
-                    <option value="<">&lt;</option>
-                    <option value="<=">≤</option>
-                  </select>
+              <div className="space-y-2 flex flex-col justify-center">
+                <span className="block text-sm font-semibold text-foreground">
+                  Selection Overview
+                </span>
+                <p
+                  className="text-sm text-muted-foreground line-clamp-2"
+                  title={selectedTypeText}
+                >
+                  <span className="font-medium text-foreground/80">Types:</span>{' '}
+                  {selectedTypeText}
+                </p>
+              </div>
+            </section>
 
-                  <input
-                    type="number"
-                    value={line.value}
-                    onChange={(e) =>
-                      updateStatLine(line.id, {
-                        value: Number(e.target.value),
-                      })
-                    }
-                    className="h-10 w-24 rounded-md border border-border/50 bg-background px-2"
-                    name={
-                      validStatName
-                        ? `effect[${effectData?.[validStatName]}]`
-                        : ''
-                    }
-                  />
+            {/* Stats Section */}
+            <section className="space-y-3 pt-4 border-t border-border/50">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground">
+                    Stats & Effects
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Filter items by their specific stats
+                  </p>
+                </div>
 
+                {!isFetchingEffect && (
                   <button
                     type="button"
-                    onClick={() => removeStatLine(line.id)}
-                    className="h-10 w-10 rounded-md border border-border/50 bg-background hover:bg-red-500/10"
-                    aria-label="Remove stat line"
+                    onClick={addStatLine}
+                    className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border/60 bg-background px-4 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   >
-                    -
+                    <Plus className="size-4" />
+                    Add Stat Filter
                   </button>
-                </div>
-              );
-            })}
-          </div>
+                )}
+              </div>
 
-          <div className="text-center">
-            {isFetchingEffect ? (
-              <Loading />
-            ) : (
+              <datalist id="stat-choices">
+                {statChoices.map((choice) => (
+                  <option key={choice} value={choice} />
+                ))}
+              </datalist>
+
+              <input type="hidden" name="op[]" value=">=" />
+
+              {isFetchingEffect ? (
+                <div className="py-4">
+                  <Loading />
+                </div>
+              ) : statLines.length > 0 ? (
+                <div className="space-y-3 mt-4">
+                  {statLines.map((line) => {
+                    const validStatName = normalizeStatName(line.statName);
+                    const inputStyle = !line.statName
+                      ? 'border-border/60 bg-background'
+                      : validStatName
+                        ? 'border-emerald-500/50 bg-emerald-500/5 focus:border-emerald-500 focus:ring-emerald-500/20'
+                        : 'border-red-500/50 bg-red-500/5 focus:border-red-500 focus:ring-red-500/20 text-red-600';
+
+                    return (
+                      <div
+                        key={line.id}
+                        className="flex flex-col sm:flex-row items-center gap-2 animate-in fade-in slide-in-from-top-2"
+                      >
+                        <div className="relative w-full sm:flex-1">
+                          <input
+                            type="text"
+                            list="stat-choices"
+                            value={line.statName}
+                            onChange={(e) =>
+                              updateStatLine(line.id, {
+                                statName: e.target.value,
+                              })
+                            }
+                            className={`h-10 w-full rounded-lg border px-3 text-sm transition-all focus:outline-none focus:ring-2 ${inputStyle}`}
+                            placeholder="Type a stat name..."
+                          />
+                        </div>
+
+                        <div className="flex w-full sm:w-auto items-center gap-2">
+                          <select
+                            value={line.op}
+                            onChange={(e) =>
+                              updateStatLine(line.id, {
+                                op: e.target.value as Operator,
+                              })
+                            }
+                            className="h-10 w-20 rounded-lg border border-border/60 bg-background px-3 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary font-medium"
+                            name={
+                              validStatName
+                                ? `op[${effectData?.[validStatName]}]`
+                                : ''
+                            }
+                          >
+                            <option value=">=">&ge;</option>
+                            <option value=">">&gt;</option>
+                            <option value="=">=</option>
+                            <option value="<">&lt;</option>
+                            <option value="<=">&le;</option>
+                          </select>
+
+                          <input
+                            type="number"
+                            value={line.value}
+                            onChange={(e) =>
+                              updateStatLine(line.id, {
+                                value: Number(e.target.value),
+                              })
+                            }
+                            className="h-10 w-28 rounded-lg border border-border/60 bg-background px-3 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                            name={
+                              validStatName
+                                ? `effect[${effectData?.[validStatName]}]`
+                                : ''
+                            }
+                          />
+
+                          <button
+                            type="button"
+                            onClick={() => removeStatLine(line.id)}
+                            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background text-muted-foreground transition-colors hover:border-red-500/50 hover:bg-red-500/10 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
+                            aria-label="Remove stat filter"
+                            title="Remove stat filter"
+                          >
+                            <Trash2 className="size-4" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-6 px-4 rounded-lg border border-dashed border-border/60 bg-muted/10 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    No stat filters added.
+                  </p>
+                </div>
+              )}
+            </section>
+
+            {/* Actions */}
+            <div className="flex flex-col-reverse sm:flex-row gap-3 pt-6 border-t border-border/50">
+              <button
+                type="submit"
+                className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-lg border border-border/60 bg-background text-sm font-semibold transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                onClick={handleCorynClick}
+              >
+                <ExternalLink className="size-4" />
+                Search on Coryn.club
+              </button>
               <button
                 type="button"
-                onClick={addStatLine}
-                className="h-9 w-9 rounded-md border border-border/50 bg-background hover:bg-accent/20"
-                aria-label="Add stat line"
+                className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-8 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                onClick={() => handleInternalSearch(1)}
               >
-                +
+                <Search className="size-4" />
+                Search Toram Tools
               </button>
-            )}
+            </div>
           </div>
+        </form>
+      </div>
 
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="submit"
-              className="h-10 rounded-md border border-border/50 bg-background font-medium hover:opacity-90"
-              onClick={handleCorynClick}
-            >
-              Search on Coryn.club
-            </button>
-            <button
-              type="button"
-              className="h-10 rounded-md bg-primary text-primary-foreground font-medium hover:opacity-90"
-              onClick={() => handleInternalSearch(1)}
-            >
-              Search (new)
-            </button>
-          </div>
-        </fieldset>
-      </form>
-
+      {/* Results Section */}
       {searchPayload != null && isSearching ? (
-        <Loading />
+        <div className="py-12">
+          <Loading />
+        </div>
       ) : (
-        <Suspense fallback={<Loading />}>
+        <Suspense
+          fallback={
+            <div className="py-12">
+              <Loading />
+            </div>
+          }
+        >
           {searchResults ? (
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-              <div className="text-sm text-muted-foreground">
-                Page {searchResults.pagination.currentPage}/
-                {searchResults.pagination.totalPages} - Showing{' '}
-                {searchResults.data.length} of{' '}
-                {searchResults.pagination.totalItems} item(s)
+            <div className="space-y-6">
+              {/* Pagination Header */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-card px-4 py-3 rounded-xl border border-border/50 shadow-sm">
+                <div className="text-sm font-medium text-muted-foreground">
+                  Found{' '}
+                  <span className="text-foreground font-bold">
+                    {searchResults.pagination.totalItems}
+                  </span>{' '}
+                  items
+                  <span className="mx-2 hidden sm:inline text-border">|</span>
+                  <span className="block sm:inline mt-1 sm:mt-0 text-xs sm:text-sm">
+                    Page {searchResults.pagination.currentPage} of{' '}
+                    {searchResults.pagination.totalPages || 1}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    className="inline-flex h-9 items-center justify-center gap-1 rounded-md border border-border/60 bg-background px-3 text-sm font-medium transition-colors hover:bg-accent disabled:pointer-events-none disabled:opacity-50"
+                    disabled={
+                      isSearching || searchResults.pagination.currentPage <= 1
+                    }
+                    onClick={() =>
+                      handleInternalSearch(
+                        searchResults.pagination.currentPage - 1,
+                      )
+                    }
+                  >
+                    <ChevronLeft className="size-4" />
+                    <span className="hidden sm:inline">Prev</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="inline-flex h-9 items-center justify-center gap-1 rounded-md border border-border/60 bg-background px-3 text-sm font-medium transition-colors hover:bg-accent disabled:pointer-events-none disabled:opacity-50"
+                    disabled={
+                      isSearching ||
+                      searchResults.pagination.currentPage >=
+                        searchResults.pagination.totalPages
+                    }
+                    onClick={() =>
+                      handleInternalSearch(
+                        searchResults.pagination.currentPage + 1,
+                      )
+                    }
+                  >
+                    <span className="hidden sm:inline">Next</span>
+                    <ChevronRight className="size-4" />
+                  </button>
+                </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  className="h-8 rounded-md border border-border/50 bg-background px-3 text-sm disabled:opacity-50"
-                  disabled={
-                    isSearching || searchResults.pagination.currentPage <= 1
-                  }
-                  onClick={() =>
-                    handleInternalSearch(searchResults.pagination.currentPage - 1)
-                  }
-                >
-                  Prev
-                </button>
-                <button
-                  type="button"
-                  className="h-8 rounded-md border border-border/50 bg-background px-3 text-sm disabled:opacity-50"
-                  disabled={
-                    isSearching ||
-                    searchResults.pagination.currentPage >=
-                      searchResults.pagination.totalPages
-                  }
-                  onClick={() =>
-                    handleInternalSearch(searchResults.pagination.currentPage + 1)
-                  }
-                >
-                  Next
-                </button>
-              </div>
+              {/* Grid or Empty State */}
+              {searchResults.data.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {searchResults.data.map((item) => (
+                    <CardItem key={item.id} item={item} />
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-20 px-4 rounded-2xl border border-dashed border-border/60 bg-card/50 text-center">
+                  <div className="rounded-full bg-muted/50 p-4 mb-4">
+                    <PackageSearch className="size-10 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-lg font-bold text-foreground mb-1">
+                    No items found
+                  </h3>
+                  <p className="text-sm text-muted-foreground max-w-sm">
+                    We couldn't find any items matching your current filters.
+                    Try adjusting your search parameters.
+                  </p>
+                </div>
+              )}
+
+              {/* Bottom Pagination (only if many items) */}
+              {searchResults.data.length > 8 &&
+                searchResults.pagination.totalPages > 1 && (
+                  <div className="flex justify-center pt-4">
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border/60 bg-background transition-colors hover:bg-accent disabled:pointer-events-none disabled:opacity-50"
+                        disabled={
+                          isSearching ||
+                          searchResults.pagination.currentPage <= 1
+                        }
+                        onClick={() =>
+                          handleInternalSearch(
+                            searchResults.pagination.currentPage - 1,
+                          )
+                        }
+                      >
+                        <ChevronLeft className="size-5" />
+                      </button>
+                      <div className="px-4 text-sm font-medium text-muted-foreground">
+                        {searchResults.pagination.currentPage} /{' '}
+                        {searchResults.pagination.totalPages}
+                      </div>
+                      <button
+                        type="button"
+                        className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border/60 bg-background transition-colors hover:bg-accent disabled:pointer-events-none disabled:opacity-50"
+                        disabled={
+                          isSearching ||
+                          searchResults.pagination.currentPage >=
+                            searchResults.pagination.totalPages
+                        }
+                        onClick={() =>
+                          handleInternalSearch(
+                            searchResults.pagination.currentPage + 1,
+                          )
+                        }
+                      >
+                        <ChevronRight className="size-5" />
+                      </button>
+                    </div>
+                  </div>
+                )}
             </div>
           ) : null}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-2">
-            {searchResults?.data.map((item) => (
-              <CardItem key={item.id} item={item} />
-            ))}
-          </div>
         </Suspense>
       )}
     </div>
