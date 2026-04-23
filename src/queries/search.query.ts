@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import type { Page } from '@/types';
 import type { Item, SearchPayload } from '@/types/search.type';
 import { Request } from '@/utils/request';
@@ -27,11 +27,28 @@ export const useGetItemTypesData = () =>
     },
   });
 
-export const useSearchItems = () =>
-  useMutation<Page<Item>, Error, SearchPayload>({
-    mutationFn: (data) =>
+export const useSearchItems = (data: SearchPayload | null) => {
+  const page = data?.page ?? 1;
+  const pageSize = data?.pageSize ?? 10;
+  const types = data?.types ? [...data.types] : [];
+  const stats = data?.stats ? [...data.stats] : [];
+
+  types.sort();
+  stats.sort((a, b) => a[0] - b[0]);
+
+  return useQuery<Page<Item>, Error>({
+    queryKey: [
+      'search-items',
+      page,
+      pageSize,
+      types.toString(),
+      stats.toString(),
+    ],
+    queryFn: () =>
       Request.post(new URLSearchParams({ sheet: 'Items' }), {
         sheet: 'Items',
         ...data,
       }),
+    enabled: !!data,
   });
+};

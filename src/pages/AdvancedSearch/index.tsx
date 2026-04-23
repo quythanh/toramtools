@@ -5,8 +5,11 @@ import {
   useGetItemTypesData,
   useSearchItems,
 } from '@/queries/search.query';
-import type { Page } from '@/types';
-import type { Item, Operator, SearchStatPayload } from '@/types/search.type';
+import type {
+  Operator,
+  SearchPayload,
+  SearchStatPayload,
+} from '@/types/search.type';
 
 const CardItem = lazy(() => import('./CardItem'));
 
@@ -35,9 +38,12 @@ export default function CorynClub() {
   const { data: effectData, isPending: isFetchingEffect } = useGetEffectData();
   const { data: itemTypesData, isPending: isFetchingItemTypes } =
     useGetItemTypesData();
-  const { mutateAsync: search, isPending: isSearching } = useSearchItems();
 
-  const [searchResults, setSearchResults] = useState<Page<Item> | null>(null);
+  const [searchPayload, setSearchPayload] = useState<SearchPayload | null>(
+    null,
+  );
+  const { data: searchResults, isPending: isSearching } =
+    useSearchItems(searchPayload);
 
   const itemTypesList = useMemo(
     () => Object.entries(itemTypesData ?? {}),
@@ -121,14 +127,12 @@ export default function CorynClub() {
     };
   };
 
-  // Internal search (calls API via mutateAsync)
-  const handleInternalSearch = async (page = 1) => {
+  const handleInternalSearch = (page = 1) => {
     const payload = buildPayload(
       page,
       searchResults?.pagination.pageSize ?? DEFAULT_PAGE_SIZE,
     );
-    const results = await search(payload);
-    setSearchResults(results);
+    setSearchPayload(payload);
   };
 
   // Before native submit to Coryn: ensure the form contains itype[] = -1 if user selected none.
@@ -309,7 +313,7 @@ export default function CorynClub() {
         </fieldset>
       </form>
 
-      {isSearching ? (
+      {searchPayload != null && isSearching ? (
         <Loading />
       ) : (
         <Suspense fallback={<Loading />}>
