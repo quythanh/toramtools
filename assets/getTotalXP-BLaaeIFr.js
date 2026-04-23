@@ -1,0 +1,1 @@
+import{n as e}from"./exp-BUro9stX.js";var t=(t,n,r)=>Math.floor((1-n/100)*e[t][t+1])+e[t+1][r];export{t};
