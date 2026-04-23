@@ -6,6 +6,7 @@ export type SearchStatPayload = [
   amount: number,
 ];
 export interface SearchPayload {
+  name?: string;
   types: number[];
   stats: SearchStatPayload[];
   page?: number;

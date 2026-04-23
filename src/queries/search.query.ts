@@ -41,6 +41,7 @@ export const useSearchItems = (data: SearchPayload | null) => {
       'search-items',
       page,
       pageSize,
+      data?.name,
       types.toString(),
       stats.toString(),
     ],

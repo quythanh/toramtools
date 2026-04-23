@@ -57,6 +57,7 @@ export default function CorynClub() {
   const [selectedTypes, setSelectedTypes] = useState<number[]>([-1]);
   const [statLines, setStatLines] = useState<StatLine[]>([]);
   const [nextId, setNextId] = useState(0);
+  const [name, setName] = useState<string>('');
 
   const reverseItemTypes = useMemo(
     () =>
@@ -112,19 +113,19 @@ export default function CorynClub() {
   // Build payload used for internal search
   const buildPayload = (page = 1, limit = DEFAULT_PAGE_SIZE) => {
     const types = selectedTypes.length === 0 ? [-1] : selectedTypes;
-    return {
+    const stats = statLines.map(
+      (line) =>
+        [effectData?.[line.statName], line.op, line.value] as SearchStatPayload,
+    );
+    const base = {
       types,
-      stats: statLines.map(
-        (line) =>
-          [
-            effectData?.[line.statName],
-            line.op,
-            line.value,
-          ] as SearchStatPayload,
-      ),
+      stats,
       page,
       pageSize: limit,
     };
+
+    // include name only when present (keeps payload minimal)
+    return name ? { ...base, name } : base;
   };
 
   const handleInternalSearch = (page = 1) => {
@@ -191,11 +192,25 @@ export default function CorynClub() {
             </div>
           )}
 
-          <div className="text-sm text-muted-foreground">
-            <span className="font-medium text-foreground">
-              Selected type(s):{' '}
-            </span>
-            {selectedTypeText || 'None'}
+          <div className="space-y-1">
+            <div className="text-sm text-muted-foreground">
+              <span className="font-medium text-foreground">
+                Selected type(s):{' '}
+              </span>
+              {selectedTypeText || 'None'}
+            </div>
+
+            <label className="block">
+              <span className="text-sm font-medium text-foreground">Name</span>
+              <input
+                type="text"
+                name="iname"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Item name"
+                className="mt-1 h-10 w-full rounded-md border border-border/50 bg-background px-3 text-sm"
+              />
+            </label>
           </div>
 
           <datalist id="stat-choices">
