@@ -1,2 +1,2 @@
 export const APP_ID =
-  'AKfycbwebZsMxq_7nFi_lvWc4VQfqtfaXKL50xE1aEpbVuXLih_W3UxORvWJqzPJ6OS2wDNF';
+  'AKfycbz1wpEOgYnYQOe22tlZuGz00FP1rEamkfTL-xB06AbenLTyRZ3JPls_xsXioGKxp8Ap';

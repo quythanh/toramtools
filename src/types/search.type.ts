@@ -31,14 +31,19 @@ export interface Monster {
   map: MapEntity;
 }
 
+export interface ItemType {
+  id: number;
+  label: string;
+}
+
 export interface Item {
   id: number;
   name: string;
-  type_label: string;
   sell: number;
   process: number;
   process_amount: number;
   badge?: string | null;
+  type: ItemType;
   effects?: ItemEffect[];
   monsters?: Monster[];
 }
